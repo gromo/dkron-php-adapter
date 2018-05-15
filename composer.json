@@ -1,5 +1,5 @@
 {
-  "name": "dkron-php-adapter",
+  "name": "gromo/dkron-php-adapter",
   "description": "Dkron PHP Adapter",
   "license": "MIT",
   "authors": [
