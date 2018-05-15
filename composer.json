@@ -1,0 +1,22 @@
+{
+  "name": "dkron-php-adapter",
+  "description": "Dkron PHP Adapter",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Yuriy Khabarov",
+      "email": "13real008@gmail.com",
+      "homepage": "https://github.com/gromo/dkron-php-adapter"
+    }
+  ],
+  "require": {
+    "php": "7.0.*",
+    "guzzlehttp/guzzle": "^6.2.1",
+    "guzzlehttp/psr7": "1.4.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Dkron\\": "src/"
+    }
+  }
+}
