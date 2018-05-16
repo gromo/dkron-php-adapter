@@ -101,7 +101,7 @@ class Job implements \JsonSerializable
         int $retries = 0,
         int $successCount = null,
         array $tags = null,
-        string $timezone = ''
+        string $timezone = null
     ) {
 
         $this->name = $name;
@@ -136,7 +136,7 @@ class Job implements \JsonSerializable
     /**
      * @param string $timezone
      */
-    public function setTimezone(string $timezone)
+    public function setTimezone(string $timezone = null)
     {
         $this->timezone = $timezone;
     }
@@ -351,7 +351,7 @@ class Job implements \JsonSerializable
     /**
      * @param string $executor
      */
-    public function setExecutor(string $executor)
+    public function setExecutor(string $executor = null)
     {
         $this->executor = $executor;
     }
