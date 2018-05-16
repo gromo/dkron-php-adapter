@@ -134,11 +134,26 @@ class Job implements \JsonSerializable
     }
 
     /**
-     * @param string $timezone
+     * @return array
      */
-    public function setTimezone(string $timezone = null)
+    public function getDataToSubmit(): array
     {
-        $this->timezone = $timezone;
+        return [
+            'name' => $this->name,
+            'schedule' => $this->schedule,
+            'concurrency' => $this->concurrency,
+            'dependent_jobs' => empty($this->dependentJobs) ? null : $this->dependentJobs,
+            'disabled' => $this->disabled,
+            'executor' => $this->executor,
+            'executor_config' => empty($this->executorConfig) ? null : $this->executorConfig,
+            'owner' => $this->owner,
+            'owner_email' => $this->ownerEmail,
+            'parent_job' => $this->parentJob,
+            'processors' => empty($this->processors) ? null : $this->processors,
+            'retries' => $this->retries,
+            'tags' => empty($this->tags) ? null : $this->tags,
+            'timezone' => $this->timezone,
+        ];
     }
 
     public function enableConcurrency(): self
@@ -332,9 +347,6 @@ class Job implements \JsonSerializable
      */
     public function setDependentJobs(array $dependentJobs = null): self
     {
-        if (empty($dependentJobs)) {
-            $dependentJobs = null;
-        }
         $this->dependentJobs = $dependentJobs;
         return $this;
     }
@@ -361,9 +373,6 @@ class Job implements \JsonSerializable
      */
     public function setExecutorConfig(array $executorConfig = null)
     {
-        if (empty($executorConfig)) {
-            $executorConfig = null;
-        }
         $this->executorConfig = $executorConfig;
     }
 
@@ -399,9 +408,6 @@ class Job implements \JsonSerializable
      */
     public function setProcessors(array $processors = null): self
     {
-        if (empty($processors)) {
-            $processors = null;
-        }
         $this->processors = $processors;
         return $this;
     }
@@ -429,15 +435,23 @@ class Job implements \JsonSerializable
      */
     public function setTags(array $tags = null): self
     {
-        if (empty($tags)) {
-            $tags = null;
-        }
         $this->tags = $tags;
         return $this;
     }
 
+    /**
+     * @param string $timezone
+     */
+    public function setTimezone(string $timezone = null)
+    {
+        $this->timezone = $timezone;
+    }
 
-    public static function createFromArray(array $data)
+    /**
+     * @param array $data
+     * @return Job
+     */
+    public static function createFromArray(array $data): self
     {
         return new static(
             $data['name'] ?? null,

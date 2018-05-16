@@ -44,12 +44,11 @@ class Api
      */
     public function getJob(string $name)
     {
-        $data = $this->request('/jobs/' . $name);
-        return Job::createFromArray($data);
+        return Job::createFromArray($this->request('/jobs/' . $name));
     }
 
     /**
-     * @return array
+     * @return Execution[]
      */
     public function getJobExecutions($name)
     {
@@ -58,11 +57,12 @@ class Api
         foreach ($responseData as $executionData) {
             $executions[] = Execution::createFromArray($executionData);
         }
+
         return $executions;
     }
 
     /**
-     * @return array
+     * @return Job[]
      */
     public function getJobs()
     {
@@ -71,6 +71,7 @@ class Api
         foreach ($responseData as $jobData) {
             $jobs[] = Job::createFromArray($jobData);
         }
+
         return $jobs;
     }
 
@@ -79,12 +80,11 @@ class Api
      */
     public function getLeader()
     {
-        $data = $this->request('/leader');
-        return Member::createFromArray($data);
+        return Member::createFromArray($this->request('/leader'));
     }
 
     /**
-     * @return array
+     * @return Member[]
      */
     public function getMembers()
     {
@@ -93,6 +93,7 @@ class Api
         foreach ($responseData as $memberData) {
             $members[] = Member::createFromArray($memberData);
         }
+
         return $members;
     }
 
@@ -101,14 +102,12 @@ class Api
      */
     public function getStatus()
     {
-        $data = $this->request('/');
-        return new Status(
-            $data['agent'],
-            $data['serf'],
-            $data['tags']
-        );
+        return Status::createFromArray($this->request('/'));
     }
 
+    /**
+     * @return Member[]
+     */
     public function leave()
     {
         $members = [];
@@ -116,6 +115,7 @@ class Api
         foreach ($responseData as $memberData) {
             $members[] = Member::createFromArray($memberData);
         }
+
         return $members;
     }
 
@@ -133,7 +133,7 @@ class Api
      */
     public function saveJob(Job $job)
     {
-        return $this->request('/jobs', self::METHOD_POST, $job);
+        return $this->request('/jobs', self::METHOD_POST, $job->getDataToSubmit());
     }
 
     /**
@@ -145,9 +145,14 @@ class Api
     protected function request($url, $method = self::METHOD_GET, $data = null)
     {
         /** @var Response $response */
-        $response = $this->httpClient->request($method, self::URL_PREFIX . ltrim($url, '/'), [
-            'json' => $data,
-        ]);
+        $response = $this->httpClient->request(
+            $method,
+            self::URL_PREFIX . ltrim($url, '/'),
+            [
+                'json' => $data,
+            ]
+        );
+
         return json_decode($response->getBody(), true);
     }
 }

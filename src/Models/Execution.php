@@ -32,12 +32,12 @@ class Execution implements \JsonSerializable
      * @param string $nodeName
      */
     public function __construct(
-        string $jobName,
-        string $startedAt,
-        string $finishedAt,
-        bool $success,
-        string $output,
-        string $nodeName
+        string $jobName = null,
+        string $startedAt = null,
+        string $finishedAt = null,
+        bool $success = null,
+        string $output = null,
+        string $nodeName = null
     ) {
         $this->jobName = $jobName;
         $this->startedAt = $startedAt;
@@ -72,14 +72,6 @@ class Execution implements \JsonSerializable
     }
 
     /**
-     * @return bool
-     */
-    public function isSuccess(): bool
-    {
-        return $this->success;
-    }
-
-    /**
      * @return string
      */
     public function getOutput(): string
@@ -95,6 +87,14 @@ class Execution implements \JsonSerializable
         return $this->nodeName;
     }
 
+    /**
+     * @return bool
+     */
+    public function isSuccess(): bool
+    {
+        return $this->success;
+    }
+
     public function jsonSerialize()
     {
         return [
@@ -107,7 +107,11 @@ class Execution implements \JsonSerializable
         ];
     }
 
-    public static function createFromArray(array $data)
+    /**
+     * @param array $data
+     * @return Execution
+     */
+    public static function createFromArray(array $data): self
     {
         return new static(
             $data['job_name'] ?? null,

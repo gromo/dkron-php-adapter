@@ -62,4 +62,17 @@ class Status implements \JsonSerializable
             'tags' => $this->tags,
         ];
     }
+
+    /**
+     * @param array $data
+     * @return Status
+     */
+    public static function createFromArray(array $data): self
+    {
+        return new static(
+            $data['agent'] ?? null,
+            $data['serf'] ?? null,
+            $data['tags'] ?? null
+        );
+    }
 }
