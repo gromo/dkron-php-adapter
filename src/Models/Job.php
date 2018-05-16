@@ -347,6 +347,8 @@ class Job implements \JsonSerializable
     {
         if (empty($dependent_jobs)) {
             $dependent_jobs = null;
+        } else if (!is_array($dependent_jobs)) {
+            throw new \InvalidArgumentException('DependendJobs has to be array or null');
         }
         $this->dependent_jobs = $dependent_jobs;
         return $this;
@@ -391,10 +393,12 @@ class Job implements \JsonSerializable
     /**
      * @param array $tags
      */
-    public function setProcessors(array $processors)
+    public function setProcessors($processors)
     {
         if (empty($processors)) {
             $processors = null;
+        } else if (!is_array($processors)) {
+            throw new \InvalidArgumentException('Processors has to be array or null');
         }
         $this->processors = $processors;
         return $this;
@@ -421,10 +425,12 @@ class Job implements \JsonSerializable
     /**
      * @param array $tags
      */
-    public function setTags(array $tags)
+    public function setTags($tags)
     {
         if (empty($tags)) {
             $tags = null;
+        } else if (!is_array($tags)) {
+            throw new \InvalidArgumentException('Tags has to be array or null');
         }
         $this->tags = $tags;
         return $this;
