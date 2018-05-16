@@ -19,8 +19,11 @@ class Status implements \JsonSerializable
      * @param array $serf
      * @param array $tags
      */
-    public function __construct(array $agent, array $serf, array $tags)
-    {
+    public function __construct(
+        array $agent,
+        array $serf,
+        array $tags
+    ) {
         $this->agent = $agent;
         $this->serf = $serf;
         $this->tags = $tags;
@@ -29,7 +32,7 @@ class Status implements \JsonSerializable
     /**
      * @return array
      */
-    public function getAgent()
+    public function getAgent(): array
     {
         return $this->agent;
     }
@@ -37,7 +40,7 @@ class Status implements \JsonSerializable
     /**
      * @return array
      */
-    public function getSerf()
+    public function getSerf(): array
     {
         return $this->serf;
     }
@@ -45,10 +48,11 @@ class Status implements \JsonSerializable
     /**
      * @return array
      */
-    public function getTags()
+    public function getTags(): array
     {
         return $this->tags;
     }
+
 
     public function jsonSerialize()
     {

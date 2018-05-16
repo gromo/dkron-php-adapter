@@ -6,212 +6,198 @@ namespace Dkron\Models;
 class Member implements \JsonSerializable
 {
     /** @var string */
-    private $Name;
+    private $name;
 
     /** @var string */
-    private $Addr;
+    private $addr;
 
     /** @var int */
-    private $Port;
+    private $port;
 
     /** @var array */
-    private $Tags;
+    private $tags;
 
     /** @var int */
-    private $Status;
+    private $status;
 
     /** @var int */
-    private $ProtocolMin;
+    private $protocolMin;
 
     /** @var int */
-    private $ProtocolMax;
+    private $protocolMax;
 
     /** @var int */
-    private $ProtocolCur;
+    private $protocolCur;
 
     /** @var int */
-    private $DelegateMin;
+    private $delegateMin;
 
     /** @var int */
-    private $DelegateMax;
+    private $delegateMax;
 
     /** @var int */
-    private $DelegateCur;
+    private $delegateCur;
 
     /**
      * Member constructor.
-     * @param string $Name
-     * @param string $Addr
-     * @param int $Port
-     * @param array $Tags
-     * @param int $Status
-     * @param int $ProtocolMin
-     * @param int $ProtocolMax
-     * @param int $ProtocolCur
-     * @param int $DelegateMin
-     * @param int $DelegateMax
-     * @param int $DelegateCur
+     * @param string $name
+     * @param string $addr
+     * @param int $port
+     * @param array $tags
+     * @param int $status
+     * @param int $protocolMin
+     * @param int $protocolMax
+     * @param int $protocolCur
+     * @param int $delegateMin
+     * @param int $delegateMax
+     * @param int $delegateCur
      */
     public function __construct(
-        $Name,
-        $Addr,
-        $Port,
-        array $Tags,
-        $Status,
-        $ProtocolMin,
-        $ProtocolMax,
-        $ProtocolCur,
-        $DelegateMin,
-        $DelegateMax,
-        $DelegateCur
-    )
-    {
-        $this->Name = $Name;
-        $this->Addr = $Addr;
-        $this->Port = $Port;
-        $this->Tags = $Tags;
-        $this->Status = $Status;
-        $this->ProtocolMin = $ProtocolMin;
-        $this->ProtocolMax = $ProtocolMax;
-        $this->ProtocolCur = $ProtocolCur;
-        $this->DelegateMin = $DelegateMin;
-        $this->DelegateMax = $DelegateMax;
-        $this->DelegateCur = $DelegateCur;
+        string $name,
+        string $addr,
+        int $port,
+        array $tags,
+        int $status,
+        int $protocolMin,
+        int $protocolMax,
+        int $protocolCur,
+        int $delegateMin,
+        int $delegateMax,
+        int $delegateCur
+    ) {
+        $this->name = $name;
+        $this->addr = $addr;
+        $this->port = $port;
+        $this->tags = $tags;
+        $this->status = $status;
+        $this->protocolMin = $protocolMin;
+        $this->protocolMax = $protocolMax;
+        $this->protocolCur = $protocolCur;
+        $this->delegateMin = $delegateMin;
+        $this->delegateMax = $delegateMax;
+        $this->delegateCur = $delegateCur;
     }
 
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
-        return $this->Name;
+        return $this->name;
     }
 
     /**
      * @return string
      */
-    public function getAddr()
+    public function getAddr(): string
     {
-        return $this->Addr;
+        return $this->addr;
     }
 
     /**
      * @return int
      */
-    public function getPort()
+    public function getPort(): int
     {
-        return $this->Port;
+        return $this->port;
     }
 
     /**
      * @return array
      */
-    public function getTags()
+    public function getTags(): array
     {
-        return $this->Tags;
+        return $this->tags;
     }
 
     /**
      * @return int
      */
-    public function getStatus()
+    public function getStatus(): int
     {
-        return $this->Status;
+        return $this->status;
     }
 
     /**
      * @return int
      */
-    public function getProtocolMin()
+    public function getProtocolMin(): int
     {
-        return $this->ProtocolMin;
+        return $this->protocolMin;
     }
 
     /**
      * @return int
      */
-    public function getProtocolMax()
+    public function getProtocolMax(): int
     {
-        return $this->ProtocolMax;
+        return $this->protocolMax;
     }
 
     /**
      * @return int
      */
-    public function getProtocolCur()
+    public function getProtocolCur(): int
     {
-        return $this->ProtocolCur;
+        return $this->protocolCur;
     }
 
     /**
      * @return int
      */
-    public function getDelegateMin()
+    public function getDelegateMin(): int
     {
-        return $this->DelegateMin;
+        return $this->delegateMin;
     }
 
     /**
      * @return int
      */
-    public function getDelegateMax()
+    public function getDelegateMax(): int
     {
-        return $this->DelegateMax;
+        return $this->delegateMax;
     }
 
     /**
      * @return int
      */
-    public function getDelegateCur()
+    public function getDelegateCur(): int
     {
-        return $this->DelegateCur;
+        return $this->delegateCur;
     }
+
 
     public function jsonSerialize()
     {
         return [
-            'Name' => $this->Name,
-            'Addr' => $this->Addr,
-            'Port' => $this->Port,
-            'Tags' => $this->Tags,
-            'Status' => $this->Status,
-            'ProtocolMin' => $this->ProtocolMin,
-            'ProtocolMax' => $this->ProtocolMax,
-            'ProtocolCur' => $this->ProtocolCur,
-            'DelegateMin' => $this->DelegateMin,
-            'DelegateMax' => $this->DelegateMax,
-            'DelegateCur' => $this->DelegateCur,
+            'Name' => $this->name,
+            'Addr' => $this->addr,
+            'Port' => $this->port,
+            'Tags' => $this->tags,
+            'Status' => $this->status,
+            'ProtocolMin' => $this->protocolMin,
+            'ProtocolMax' => $this->protocolMax,
+            'ProtocolCur' => $this->protocolCur,
+            'DelegateMin' => $this->delegateMin,
+            'DelegateMax' => $this->delegateMax,
+            'DelegateCur' => $this->delegateCur,
         ];
     }
 
     public static function createFromArray(array $data)
     {
-        $data = array_merge([
-            'Name' => null,
-            'Addr' => null,
-            'Port' => null,
-            'Tags' => null,
-            'Status' => null,
-            'ProtocolMin' => null,
-            'ProtocolMax' => null,
-            'ProtocolCur' => null,
-            'DelegateMin' => null,
-            'DelegateMax' => null,
-            'DelegateCur' => null,
-        ], $data);
-
         return new static(
-            $data['Name'],
-            $data['Addr'],
-            $data['Port'],
-            $data['Tags'],
-            $data['Status'],
-            $data['ProtocolMin'],
-            $data['ProtocolMax'],
-            $data['ProtocolCur'],
-            $data['DelegateMin'],
-            $data['DelegateMax'],
-            $data['DelegateCur']
+            $data['Name'] ?? null,
+            $data['Addr'] ?? null,
+            $data['Port'] ?? null,
+            $data['Tags'] ?? null,
+            $data['Status'] ?? null,
+            $data['ProtocolMin'] ?? null,
+            $data['ProtocolMax'] ?? null,
+            $data['ProtocolCur'] ?? null,
+            $data['DelegateMin'] ?? null,
+            $data['DelegateMax'] ?? null,
+            $data['DelegateCur'] ?? null
         );
     }
 }

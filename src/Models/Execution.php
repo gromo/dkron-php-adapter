@@ -5,13 +5,13 @@ namespace Dkron\Models;
 class Execution implements \JsonSerializable
 {
     /** @var string */
-    private $job_name;
+    private $jobName;
 
     /** @var string */
-    private $started_at;
+    private $startedAt;
 
     /** @var string */
-    private $finished_at;
+    private $finishedAt;
 
     /** @var bool */
     private $success;
@@ -20,62 +20,61 @@ class Execution implements \JsonSerializable
     private $output;
 
     /** @var string */
-    private $node_name;
+    private $nodeName;
 
     /**
      * Execution constructor.
-     * @param string $job_name
-     * @param string $started_at
-     * @param string $finished_at
+     * @param string $jobName
+     * @param string $startedAt
+     * @param string $finishedAt
      * @param bool $success
      * @param string $output
-     * @param string $node_name
+     * @param string $nodeName
      */
     public function __construct(
-        $job_name,
-        $started_at,
-        $finished_at,
-        $success,
-        $output,
-        $node_name
-    )
-    {
-        $this->job_name = $job_name;
-        $this->started_at = $started_at;
-        $this->finished_at = $finished_at;
+        string $jobName,
+        string $startedAt,
+        string $finishedAt,
+        bool $success,
+        string $output,
+        string $nodeName
+    ) {
+        $this->jobName = $jobName;
+        $this->startedAt = $startedAt;
+        $this->finishedAt = $finishedAt;
         $this->success = $success;
         $this->output = $output;
-        $this->node_name = $node_name;
+        $this->nodeName = $nodeName;
     }
 
     /**
      * @return string
      */
-    public function getJobName()
+    public function getJobName(): string
     {
-        return $this->job_name;
+        return $this->jobName;
     }
 
     /**
      * @return string
      */
-    public function getStartedAt()
+    public function getStartedAt(): string
     {
-        return $this->started_at;
+        return $this->startedAt;
     }
 
     /**
      * @return string
      */
-    public function getFinishedAt()
+    public function getFinishedAt(): string
     {
-        return $this->finished_at;
+        return $this->finishedAt;
     }
 
     /**
      * @return bool
      */
-    public function isSuccess()
+    public function isSuccess(): bool
     {
         return $this->success;
     }
@@ -83,7 +82,7 @@ class Execution implements \JsonSerializable
     /**
      * @return string
      */
-    public function getOutput()
+    public function getOutput(): string
     {
         return $this->output;
     }
@@ -91,41 +90,32 @@ class Execution implements \JsonSerializable
     /**
      * @return string
      */
-    public function getNodeName()
+    public function getNodeName(): string
     {
-        return $this->node_name;
+        return $this->nodeName;
     }
 
     public function jsonSerialize()
     {
         return [
-            'job_name' => $this->job_name,
-            'started_at' => $this->started_at,
-            'finished_at' => $this->finished_at,
+            'job_name' => $this->jobName,
+            'started_at' => $this->startedAt,
+            'finished_at' => $this->finishedAt,
             'success' => $this->success,
             'output' => $this->output,
-            'node_name' => $this->node_name,
+            'node_name' => $this->nodeName,
         ];
     }
 
     public static function createFromArray(array $data)
     {
-        $data = array_merge([
-            'job_name' => null,
-            'started_at' => null,
-            'finished_at' => null,
-            'success' => null,
-            'output' => null,
-            'node_name' => null,
-        ], $data);
-
         return new static(
-            $data['job_name'],
-            $data['started_at'],
-            $data['finished_at'],
-            $data['success'],
-            $data['output'],
-            $data['node_name']
+            $data['job_name'] ?? null,
+            $data['started_at'] ?? null,
+            $data['finished_at'] ?? null,
+            $data['success'] ?? null,
+            $data['output'] ?? null,
+            $data['node_name'] ?? null
         );
     }
 }

@@ -5,10 +5,9 @@ namespace Dkron;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
 
-use Dkron\Models\Execution;
-use Dkron\Models\Job;
-use Dkron\Models\Member;
-use Dkron\Models\Status;
+use Dkron\Models\{
+    Execution, Job, Member, Status
+};
 
 class Api
 {
