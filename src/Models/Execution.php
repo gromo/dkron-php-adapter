@@ -107,4 +107,25 @@ class Execution implements \JsonSerializable
             'node_name' => $this->node_name,
         ];
     }
+
+    public static function createFromArray(array $data)
+    {
+        $data = array_merge([
+            'job_name' => null,
+            'started_at' => null,
+            'finished_at' => null,
+            'success' => null,
+            'output' => null,
+            'node_name' => null,
+        ], $data);
+
+        return new static(
+            $data['job_name'],
+            $data['started_at'],
+            $data['finished_at'],
+            $data['success'],
+            $data['output'],
+            $data['node_name']
+        );
+    }
 }

@@ -183,4 +183,35 @@ class Member implements \JsonSerializable
             'DelegateCur' => $this->DelegateCur,
         ];
     }
+
+    public static function createFromArray(array $data)
+    {
+        $data = array_merge([
+            'Name' => null,
+            'Addr' => null,
+            'Port' => null,
+            'Tags' => null,
+            'Status' => null,
+            'ProtocolMin' => null,
+            'ProtocolMax' => null,
+            'ProtocolCur' => null,
+            'DelegateMin' => null,
+            'DelegateMax' => null,
+            'DelegateCur' => null,
+        ], $data);
+
+        return new static(
+            $data['Name'],
+            $data['Addr'],
+            $data['Port'],
+            $data['Tags'],
+            $data['Status'],
+            $data['ProtocolMin'],
+            $data['ProtocolMax'],
+            $data['ProtocolCur'],
+            $data['DelegateMin'],
+            $data['DelegateMax'],
+            $data['DelegateCur']
+        );
+    }
 }

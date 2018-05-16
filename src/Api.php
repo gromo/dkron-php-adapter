@@ -46,7 +46,7 @@ class Api
     public function getJob(string $name)
     {
         $data = $this->request('/jobs/' . $name);
-        return $this->createJobFromData($data);
+        return Job::createFromArray($data);
     }
 
     /**
@@ -55,9 +55,9 @@ class Api
     public function getJobExecutions($name)
     {
         $executions = [];
-        $responseData = $this->request('/jobs/' . $this->name . '/executions');
+        $responseData = $this->request('/jobs/' . $name . '/executions');
         foreach ($responseData as $executionData) {
-            $executions[] = $this->createExecutionFromData($executionData);
+            $executions[] = Execution::createFromArray($executionData);
         }
         return $executions;
     }
@@ -70,7 +70,7 @@ class Api
         $jobs = [];
         $responseData = $this->request('/jobs');
         foreach ($responseData as $jobData) {
-            $jobs[] = $this->createJobFromData($jobData);
+            $jobs[] = Job::createFromArray($jobData);
         }
         return $jobs;
     }
@@ -81,7 +81,7 @@ class Api
     public function getLeader()
     {
         $data = $this->request('/leader');
-        return $this->createMemberFromData($data);
+        return Member::createFromArray($data);
     }
 
     /**
@@ -92,7 +92,7 @@ class Api
         $members = [];
         $responseData = $this->request('/members');
         foreach ($responseData as $memberData) {
-            $members[] = $this->createMemberFromData($memberData);
+            $members[] = Member::createFromArray($memberData);
         }
         return $members;
     }
@@ -115,7 +115,7 @@ class Api
         $members = [];
         $responseData = $this->request('/leave');
         foreach ($responseData as $memberData) {
-            $members[] = $this->createMemberFromData($memberData);
+            $members[] = Member::createFromArray($memberData);
         }
         return $members;
     }
@@ -135,63 +135,6 @@ class Api
     public function saveJob(Job $job)
     {
         return $this->request('/jobs', self::METHOD_POST, $job);
-    }
-
-
-    protected function createExecutionFromData(array $data)
-    {
-        return new Execution(
-            $data['job_name'],
-            $data['started_at'],
-            $data['finished_at'],
-            $data['success'],
-            $data['output'],
-            $data['node_name']
-        );
-    }
-
-    /**
-     * @param array $data
-     * @return Job
-     */
-    protected function createJobFromData(array $data)
-    {
-        return new Job(
-            $data['name'],
-            $data['schedule'],
-            $data['command'],
-            $data['concurrency'],
-            $data['dependent_jobs'],
-            $data['disabled'],
-            $data['error_count'],
-            $data['last_error'],
-            $data['last_success'],
-            $data['owner'],
-            $data['owner_email'],
-            $data['parent_job'],
-            $data['processors'],
-            $data['retries'],
-            $data['shell'],
-            $data['success_count'],
-            $data['tags']
-        );
-    }
-
-    protected function createMemberFromData(array $data)
-    {
-        return new Member(
-            $data['Name'],
-            $data['Addr'],
-            $data['Port'],
-            $data['Tags'],
-            $data['Status'],
-            $data['ProtocolMin'],
-            $data['ProtocolMax'],
-            $data['ProtocolCur'],
-            $data['DelegateMin'],
-            $data['DelegateMax'],
-            $data['DelegateCur']
-        );
     }
 
     /**
