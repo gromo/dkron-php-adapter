@@ -11,121 +11,83 @@ class Job implements \JsonSerializable
     /** @var string */
     private $concurrency = self::CONCURRENCY_ALLOW;
 
-    /** @var array */
-    private $dependentJobs;
+    /** @var string[] */
+    private $dependentJobs = [];
 
     /** @var bool */
     private $disabled = false;
 
     /** @var string */
-    private $executor;
+    private $executor = "";
 
-    /** @var array */
-    private $executorConfig;
-
-    /** @var int */
-    private $errorCount;
-
-    /** @var string */
-    private $lastError;
-
-    /** @var string */
-    private $lastSuccess;
-
-    /** @var string */
-    private $name;
-
-    /** @var string */
-    private $owner;
-
-    /** @var string */
-    private $ownerEmail;
-
-    /** @var string */
-    private $parentJob;
-
-    /** @var array */
-    private $processors;
+    /** @var array[string]string */
+    private $executorConfig = [];
 
     /** @var int */
-    private $retries;
+    private $errorCount = 0;
 
     /** @var string */
-    private $schedule;
+    private $lastError = "";
+
+    /** @var string */
+    private $lastSuccess = "";
+
+    /** @var string */
+    private $name = "";
+
+    /** @var string */
+    private $owner = "";
+
+    /** @var string */
+    private $ownerEmail = "";
+
+    /** @var string */
+    private $parentJob = "";
+
+    /** @var array[string]string */
+    private $processors = [];
 
     /** @var int */
-    private $successCount;
-
-    /** @var array */
-    private $tags;
+    private $retries = 0;
 
     /** @var string */
-    private $timezone;
+    private $schedule = "* * * * * *";
+
+    /** @var int */
+    private $successCount = 0;
+
+    /** @var array[string]string */
+    private $tags = [];
+
+    /** @var string */
+    private $timezone = "";
 
     /**
      * Job constructor.
      * @param string $name
      * @param string $schedule
-     * @param string $concurrency
-     * @param array $dependentJobs
-     * @param bool $disabled
-     * @param int $errorCount
-     * @param string $executor
-     * @param array $executorConfig
-     * @param string $lastError
-     * @param string $lastSuccess
-     * @param string $owner
-     * @param string $ownerEmail
-     * @param string $parentJob
-     * @param array $processors
-     * @param int $retries
-     * @param int $successCount
-     * @param array $tags
-     * @param string $timezone
+     * @param int|null $errorCount
+     * @param string|null $lastError
+     * @param string|null $lastSuccess
+     * @param int|null $successCount
      */
     public function __construct(
         string $name,
         string $schedule,
-        string $concurrency = null,
-        array $dependentJobs = null,
-        bool $disabled = false,
         int $errorCount = null,
-        string $executor = null,
-        array $executorConfig = null,
         string $lastError = null,
         string $lastSuccess = null,
-        string $owner = null,
-        string $ownerEmail = null,
-        string $parentJob = null,
-        array $processors = null,
-        int $retries = null,
-        int $successCount = null,
-        array $tags = null,
-        string $timezone = null
+        int $successCount = null
     ) {
 
         $this->name = $name;
+        $this->setSchedule($schedule);
 
         // read-only parameters
-        $this->errorCount = $errorCount;
-        $this->lastError = $lastError;
-        $this->lastSuccess = $lastSuccess;
-        $this->successCount = $successCount;
-
-        // pre-process && validate data before set
-        $this->setConcurrency($concurrency);
-        $this->setDependentJobs($dependentJobs);
-        $this->setDisabled($disabled);
-        $this->setExecutor($executor);
-        $this->setExecutorConfig($executorConfig);
-        $this->setOwner($owner);
-        $this->setOwnerEmail($ownerEmail);
-        $this->setParentJob($parentJob);
-        $this->setProcessors($processors);
-        $this->setRetries($retries);
-        $this->setSchedule($schedule);
-        $this->setTags($tags);
-        $this->setTimezone($timezone);
+        $this->errorCount = is_int($errorCount) ? $errorCount : 0;
+        $this->lastError = is_string($lastError) ? $lastError : '';
+        $this->lastSuccess = is_string($lastSuccess) ? $lastSuccess : '';
+        $this->successCount = is_int($successCount) ? $successCount : 0;
     }
 
     public function disableConcurrency(): self
@@ -133,8 +95,13 @@ class Job implements \JsonSerializable
         return $this->setConcurrency(self::CONCURRENCY_FORBID);
     }
 
+    public function enableConcurrency(): self
+    {
+        return $this->setConcurrency(self::CONCURRENCY_ALLOW);
+    }
+
     /**
-     * @return array
+     * @return array[string]string
      */
     public function getDataToSubmit(): array
     {
@@ -142,7 +109,7 @@ class Job implements \JsonSerializable
             'name' => $this->name,
             'schedule' => $this->schedule,
             'concurrency' => $this->concurrency,
-            'dependent_jobs' => empty($this->dependentJobs) ? null : $this->dependentJobs,
+            'dependent_jobs' => $this->dependentJobs,
             'disabled' => $this->disabled,
             'executor' => $this->executor,
             'executor_config' => empty($this->executorConfig) ? null : $this->executorConfig,
@@ -154,11 +121,6 @@ class Job implements \JsonSerializable
             'tags' => empty($this->tags) ? null : $this->tags,
             'timezone' => $this->timezone,
         ];
-    }
-
-    public function enableConcurrency(): self
-    {
-        return $this->setConcurrency(self::CONCURRENCY_ALLOW);
     }
 
     /**
@@ -186,11 +148,19 @@ class Job implements \JsonSerializable
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getDependentJobs(): array
     {
         return $this->dependentJobs;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getDisabled(): bool
+    {
+        return $this->disabled;
     }
 
     /**
@@ -210,7 +180,7 @@ class Job implements \JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array[string]string
      */
     public function getExecutorConfig(): array
     {
@@ -258,7 +228,7 @@ class Job implements \JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array[string]string
      */
     public function getProcessors(): array
     {
@@ -282,7 +252,7 @@ class Job implements \JsonSerializable
     }
 
     /**
-     * @return array
+     * @return array[string]string
      */
     public function getTags(): array
     {
@@ -305,6 +275,9 @@ class Job implements \JsonSerializable
         return $this->disabled;
     }
 
+    /**
+     * @return array[string]string
+     */
     public function jsonSerialize(): array
     {
         return [
@@ -330,34 +303,26 @@ class Job implements \JsonSerializable
     }
 
     /**
-     * Set concurrency
-     *  If null, use default value 'allow'
-     *
      * @param string $concurrency
      * @return $this
      */
-    public function setConcurrency(string $concurrency = null): self
+    public function setConcurrency(string $concurrency): self
     {
-        if (!is_null($concurrency)) {
-            if (!in_array($concurrency, [self::CONCURRENCY_ALLOW, self::CONCURRENCY_FORBID], true)) {
-                throw new \InvalidArgumentException('Concurrency value is incorrect. Allowed values are '
-                    . self::CONCURRENCY_ALLOW . ' or ' . self::CONCURRENCY_FORBID);
-            }
-            $this->concurrency = $concurrency;
+        if (!in_array($concurrency, [self::CONCURRENCY_ALLOW, self::CONCURRENCY_FORBID], true)) {
+            throw new \InvalidArgumentException('Concurrency value is incorrect. Allowed values are '
+                . self::CONCURRENCY_ALLOW . ' or ' . self::CONCURRENCY_FORBID);
         }
-
+        $this->concurrency = $concurrency;
         return $this;
     }
 
     /**
-     * @param array $dependentJobs
+     * @param string[] $dependentJobs
      * @return $this
      */
-    public function setDependentJobs(array $dependentJobs = null): self
+    public function setDependentJobs(array $dependentJobs): self
     {
-        if (!is_null($dependentJobs)) {
-            $this->dependentJobs = $dependentJobs;
-        }
+        $this->dependentJobs = $dependentJobs;
         return $this;
     }
 
@@ -365,7 +330,7 @@ class Job implements \JsonSerializable
      * @param bool $disabled
      * @return $this
      */
-    public function setDisabled($disabled): self
+    public function setDisabled(bool $disabled): self
     {
         $this->disabled = (bool)$disabled;
         return $this;
@@ -375,17 +340,17 @@ class Job implements \JsonSerializable
      * @param string $executor
      * @return $this
      */
-    public function setExecutor(string $executor = null)
+    public function setExecutor(string $executor)
     {
         $this->executor = $executor;
         return $this;
     }
 
     /**
-     * @param array $executorConfig
+     * @param array[string]string $executorConfig
      * @return $this
      */
-    public function setExecutorConfig(array $executorConfig = null)
+    public function setExecutorConfig(array $executorConfig)
     {
         $this->executorConfig = $executorConfig;
         return $this;
@@ -395,7 +360,7 @@ class Job implements \JsonSerializable
      * @param string $owner
      * @return $this
      */
-    public function setOwner($owner): self
+    public function setOwner(string $owner): self
     {
         $this->owner = $owner;
         return $this;
@@ -405,7 +370,7 @@ class Job implements \JsonSerializable
      * @param string $ownerEmail
      * @return $this
      */
-    public function setOwnerEmail($ownerEmail): self
+    public function setOwnerEmail(string $ownerEmail): self
     {
         $this->ownerEmail = $ownerEmail;
         return $this;
@@ -415,17 +380,17 @@ class Job implements \JsonSerializable
      * @param string $parentJob
      * @return $this
      */
-    public function setParentJob($parentJob): self
+    public function setParentJob(string $parentJob): self
     {
         $this->parentJob = $parentJob;
         return $this;
     }
 
     /**
-     * @param array $processors
+     * @param array[string]string $processors
      * @return $this
      */
-    public function setProcessors(array $processors = null): self
+    public function setProcessors(array $processors): self
     {
         $this->processors = $processors;
         return $this;
@@ -435,11 +400,8 @@ class Job implements \JsonSerializable
      * @param int $retries
      * @return $this
      */
-    public function setRetries(int $retries = null): self
+    public function setRetries(int $retries): self
     {
-        if (is_null($retries)) {
-            $retries = 0;
-        }
         $this->retries = $retries;
         return $this;
     }
@@ -455,51 +417,80 @@ class Job implements \JsonSerializable
     }
 
     /**
-     * @param array $tags
+     * @param array[string]string $tags
      * @return $this
      */
-    public function setTags(array $tags = null): self
+    public function setTags(array $tags): self
     {
         $this->tags = $tags;
         return $this;
     }
 
     /**
-     * @param string|null $timezone
+     * @param string $timezone
      * @return $this
      */
-    public function setTimezone(string $timezone = null)
+    public function setTimezone(string $timezone)
     {
         $this->timezone = $timezone;
         return $this;
     }
 
     /**
-     * @param array $data
+     * @param array[string]string $data
      * @return Job
      */
     public static function createFromArray(array $data): self
     {
-        return new self(
-            $data['name'] ?? null,
-            $data['schedule'] ?? null,
-            $data['concurrency'] ?? null,
-            $data['dependent_jobs'] ?? null,
-            $data['disabled'] ?? false,
-            $data['error_count'] ?? 0,
-            $data['executor'] ?? null,
-            $data['executor_config'] ?? null,
+        // create job with required and read-only data
+        $job = new self(
+            $data['name'],
+            $data['schedule'],
+            $data['error_count'] ?? null,
             $data['last_error'] ?? null,
             $data['last_success'] ?? null,
-            $data['owner'] ?? null,
-            $data['owner_email'] ?? null,
-            $data['parent_job'] ?? null,
-            $data['processors'] ?? null,
-            $data['retries'] ?? 0,
-            $data['success_count'] ?? 0,
-            $data['tags'] ?? null,
-            $data['timezone'] ?? null
+            $data['success_count'] ?? null
         );
+        if (isset($data['concurrency'])) {
+            $job->setConcurrency($data['concurrency']);
+        }
+        if (isset($data['disabled'])) {
+            $job->setDisabled($data['disabled']);
+        }
+        if (isset($data['executor'])) {
+            $job->setExecutor($data['executor']);
+        }
+        if (isset($data['executor_config'])) {
+            $job->setExecutorConfig($data['executor_config']);
+        }
+        if (isset($data['owner'])) {
+            $job->setOwner($data['owner']);
+        }
+        if (isset($data['owner_email'])) {
+            $job->setOwnerEmail($data['owner_email']);
+        }
+        if (isset($data['parent_job'])) {
+            $job->setParentJob($data['parent_job']);
+        }
+        if (isset($data['retries'])) {
+            $job->setRetries($data['retries']);
+        }
+        if (isset($data['timezone'])) {
+            $job->setTimezone($data['timezone']);
+        }
+
+        // nullable values
+        if (!empty($data['dependent_jobs'])) {
+            $job->setDependentJobs($data['dependent_jobs']);
+        }
+        if (!empty($data['processors'])) {
+            $job->setProcessors($data['processors']);
+        }
+        if (!empty($data['tags'])) {
+            $job->setTags($data['tags']);
+        }
+
+        return $job;
     }
 
 }

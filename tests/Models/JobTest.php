@@ -13,68 +13,102 @@ class JobTest extends TestCase
         $mockData = [
             'name' => 'test:name',
             'schedule' => 'test:schedule',
+            'concurrency' => Job::CONCURRENCY_FORBID,
+            'dependent_jobs' => ['job1', 'job2'],
+            'disabled' => true,
+            'error_count' => 10,
+            'executor' => 'shell',
+            'executor_config' => [
+                'command' => 'ln -ls /tmp',
+                'env' => 'FOO=bar',
+                'shell' => true
+            ],
+            'last_error' => '0001-01-01T00:00:00Z',
+            'last_success' => '2018-05-17T09:00:01.150388465Z',
+            'owner' => 'owner',
+            'owner_email' => 'owner@test.com',
+            'parent_job' => 'parent-job',
+            'processors' => [
+                'log' => [
+                    'forward' => true,
+                ],
+            ],
+            'retries' => 2,
+            'success_count' => 99,
+            'tags' => [
+                'role' => 'web'
+            ],
+            'timezone' => "Europe/London",
         ];
         $job = Job::createFromArray($mockData);
 
         $this->assertInstanceOf(Job::class, $job);
 
-        $this->assertEquals($mockData['name'], $job->getName());
-        $this->assertEquals($mockData['schedule'], $job->getSchedule());
+        foreach ($mockData as $key => $value) {
+            $getter = 'get' . str_replace('_', '', ucwords($key, '_'));
+            $this->assertEquals($value, $job->$getter());
+        }
     }
 
     public function testGetDataToSubmit()
     {
+        $mockData = [
+            'name' => 'test:name',
+            'schedule' => 'test:schedule',
+        ];
+
         $job = new Job(
-            'test:name',
-            'test:schedule',
-            'allow',
-            [],
-            false,
+            $mockData['name'],
+            $mockData['schedule'],
             777,
-            null,
-            [],
             'Last Error Date',
             'Last Success Date',
-            null,
-            null,
-            null,
-            [],
-            null,
-            999,
-            [],
-            null
+            999
         );
+        $job->setExecutorConfig([]);
+        $job->setProcessors([]);
+        $job->setTags([]);
 
         $dataToSubmit = $job->getDataToSubmit();
 
-        // check required fields
-        $this->assertArrayHasKey('name', $dataToSubmit);
-        $this->assertArrayHasKey('schedule', $dataToSubmit);
-        $this->assertArrayHasKey('concurrency', $dataToSubmit);
-        $this->assertArrayHasKey('dependent_jobs', $dataToSubmit);
-        $this->assertArrayHasKey('disabled', $dataToSubmit);
-        $this->assertArrayHasKey('executor', $dataToSubmit);
-        $this->assertArrayHasKey('executor_config', $dataToSubmit);
-        $this->assertArrayHasKey('owner', $dataToSubmit);
-        $this->assertArrayHasKey('owner_email', $dataToSubmit);
-        $this->assertArrayHasKey('parent_job', $dataToSubmit);
-        $this->assertArrayHasKey('processors', $dataToSubmit);
-        $this->assertArrayHasKey('retries', $dataToSubmit);
-        $this->assertArrayHasKey('tags', $dataToSubmit);
-        $this->assertArrayHasKey('timezone', $dataToSubmit);
+        $requiredFields = [
+            'concurrency',
+            'dependent_jobs',
+            'disabled',
+            'executor',
+            'executor_config',
+            'name',
+            'owner',
+            'owner_email',
+            'parent_job',
+            'processors',
+            'retries',
+            'schedule',
+            'tags',
+            'timezone',
+        ];
+        foreach ($requiredFields as $field) {
+            $this->assertArrayHasKey($field, $dataToSubmit);
+        }
 
-        // check read-only fields are ignored
-        $this->assertArrayNotHasKey('error_count', $dataToSubmit);
-        $this->assertArrayNotHasKey('last_error', $dataToSubmit);
-        $this->assertArrayNotHasKey('last_success', $dataToSubmit);
-        $this->assertArrayNotHasKey('success_count', $dataToSubmit);
+        $readonlyFields = [
+            'error_count',
+            'last_error',
+            'last_success',
+            'success_count',
+        ];
+        foreach ($readonlyFields as $field) {
+            $this->assertArrayNotHasKey($field, $dataToSubmit);
+        }
 
-        // check empty arrays are converted to nulls
-        $this->assertNull($dataToSubmit['dependent_jobs']);
+        // check values
+        foreach ($mockData as $key => $value) {
+            $this->assertEquals($value, $dataToSubmit[$key]);
+        }
+
+        // check empty key-value arrays are converted to nulls
         $this->assertNull($dataToSubmit['executor_config']);
         $this->assertNull($dataToSubmit['processors']);
         $this->assertNull($dataToSubmit['tags']);
-
-
     }
 }

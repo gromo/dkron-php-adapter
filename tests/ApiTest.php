@@ -262,6 +262,16 @@ class ApiTest extends TestCase
         $mockData = [
             'name' => 'test:name',
             'schedule' => 'test:schedule',
+            'executor' => 'shell',
+            'executor_config' => [
+                'command' => 'ls -la /tmp',
+                'shell' => true
+            ],
+            'processors' => [
+                'log' => [
+                    'forward' => true,
+                ],
+            ],
         ];
         $http = $this->getHttpCient($mockData);
         $api = new Api($http->client);
