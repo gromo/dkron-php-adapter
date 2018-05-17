@@ -129,11 +129,10 @@ class Api
 
     /**
      * @param Job $job
-     * @return array|null
      */
     public function saveJob(Job $job)
     {
-        return $this->request('/jobs', self::METHOD_POST, $job->getDataToSubmit());
+        $this->request('/jobs', self::METHOD_POST, $job->getDataToSubmit());
     }
 
     /**

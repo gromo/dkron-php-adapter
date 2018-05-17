@@ -20,9 +20,9 @@ class Status implements \JsonSerializable
      * @param array $tags
      */
     public function __construct(
-        array $agent,
-        array $serf,
-        array $tags
+        array $agent = null,
+        array $serf = null,
+        array $tags = null
     ) {
         $this->agent = $agent;
         $this->serf = $serf;
