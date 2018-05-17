@@ -1,0 +1,21 @@
+language: php
+
+php:
+  - '7.0'
+  - '7.1'
+  - '7.2'
+
+install:
+  - travis_retry composer install --no-interaction --no-suggest
+
+script:
+  - ./vendor/bin/phpunit tests
+
+branches:
+  only: master
+
+# You can delete the cache using travis-ci web interface
+cache:
+  directories:
+  - vendor
+  - $HOME/.cache/composer

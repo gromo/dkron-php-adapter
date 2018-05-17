@@ -510,5 +510,4 @@ class Job implements \JsonSerializable
 
         return $job;
     }
-
 }

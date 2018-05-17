@@ -26,5 +26,8 @@
     "psr-4": {
       "Dkron\\Tests\\": "tests/"
     }
+  },
+  "scripts": {
+    "test": "./vendor/bin/phpunit"
   }
 }

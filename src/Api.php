@@ -153,7 +153,7 @@ class Api
      * @return array|null
      * @throws GuzzleException
      */
-    protected function request($url, $method = self::METHOD_GET, $data = null): array
+    protected function request($url, $method = self::METHOD_GET, $data = null)
     {
         /** @var Response $response */
         $response = $this->httpClient->request(
