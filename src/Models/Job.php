@@ -2,6 +2,8 @@
 
 namespace Dkron\Models;
 
+use InvalidArgumentException;
+
 class Job implements \JsonSerializable
 {
 
@@ -307,11 +309,12 @@ class Job implements \JsonSerializable
     /**
      * @param string $concurrency
      * @return $this
+     * @throws InvalidArgumentException
      */
     public function setConcurrency(string $concurrency): self
     {
         if (!in_array($concurrency, [self::CONCURRENCY_ALLOW, self::CONCURRENCY_FORBID], true)) {
-            throw new \InvalidArgumentException('Concurrency value is incorrect. Allowed values are '
+            throw new InvalidArgumentException('Concurrency value is incorrect. Allowed values are '
                 . self::CONCURRENCY_ALLOW . ' or ' . self::CONCURRENCY_FORBID);
         }
         $this->concurrency = $concurrency;

@@ -3,6 +3,7 @@
 namespace Dkron;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
 
 use Dkron\Models\{
@@ -31,6 +32,7 @@ class Api
 
     /**
      * @param string $name
+     * @throws GuzzleException
      */
     public function deleteJob($name)
     {
@@ -40,17 +42,19 @@ class Api
     /**
      * @param string $name
      * @return Job
-     * @throws \Exception
+     * @throws GuzzleException
      */
-    public function getJob(string $name)
+    public function getJob(string $name): Job
     {
         return Job::createFromArray($this->request('/jobs/' . $name));
     }
 
     /**
+     * @param $name
      * @return Execution[]
+     * @throws GuzzleException
      */
-    public function getJobExecutions($name)
+    public function getJobExecutions($name): array
     {
         $executions = [];
         $responseData = $this->request('/jobs/' . $name . '/executions');
@@ -63,8 +67,9 @@ class Api
 
     /**
      * @return Job[]
+     * @throws GuzzleException
      */
-    public function getJobs()
+    public function getJobs(): array
     {
         $jobs = [];
         $responseData = $this->request('/jobs');
@@ -77,16 +82,18 @@ class Api
 
     /**
      * @return Member
+     * @throws GuzzleException
      */
-    public function getLeader()
+    public function getLeader(): Member
     {
         return Member::createFromArray($this->request('/leader'));
     }
 
     /**
      * @return Member[]
+     * @throws GuzzleException
      */
-    public function getMembers()
+    public function getMembers(): array
     {
         $members = [];
         $responseData = $this->request('/members');
@@ -99,16 +106,18 @@ class Api
 
     /**
      * @return Status
+     * @throws GuzzleException
      */
-    public function getStatus()
+    public function getStatus(): Status
     {
         return Status::createFromArray($this->request('/'));
     }
 
     /**
      * @return Member[]
+     * @throws GuzzleException
      */
-    public function leave()
+    public function leave(): array
     {
         $members = [];
         $responseData = $this->request('/leave');
@@ -121,6 +130,7 @@ class Api
 
     /**
      * @param string $name
+     * @throws GuzzleException
      */
     public function runJob($name)
     {
@@ -129,6 +139,7 @@ class Api
 
     /**
      * @param Job $job
+     * @throws GuzzleException
      */
     public function saveJob(Job $job)
     {
@@ -140,8 +151,9 @@ class Api
      * @param string $method
      * @param mixed $data
      * @return array|null
+     * @throws GuzzleException
      */
-    protected function request($url, $method = self::METHOD_GET, $data = null)
+    protected function request($url, $method = self::METHOD_GET, $data = null): array
     {
         /** @var Response $response */
         $response = $this->httpClient->request(
