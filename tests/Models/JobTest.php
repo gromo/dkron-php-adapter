@@ -14,41 +14,12 @@ class JobTest extends TestCase
         $mockData = [
             'name' => 'test:name',
             'schedule' => 'test:schedule',
-            'concurrency' => Job::CONCURRENCY_FORBID,
-            'dependent_jobs' => ['job1', 'job2'],
-            'disabled' => true,
-            'error_count' => 10,
-            'executor' => 'shell',
-            'executor_config' => [
-                'command' => 'ln -ls /tmp',
-                'env' => 'FOO=bar',
-                'shell' => true
-            ],
-            'last_error' => '0001-01-01T00:00:00Z',
-            'last_success' => '2018-05-17T09:00:01.150388465Z',
-            'owner' => 'owner',
-            'owner_email' => 'owner@test.com',
-            'parent_job' => 'parent-job',
-            'processors' => [
-                'log' => [
-                    'forward' => true,
-                ],
-            ],
-            'retries' => 2,
-            'success_count' => 99,
-            'tags' => [
-                'role' => 'web'
-            ],
-            'timezone' => "Europe/London",
         ];
         $job = Job::createFromArray($mockData);
 
         $this->assertInstanceOf(Job::class, $job);
-
-        foreach ($mockData as $key => $value) {
-            $getter = 'get' . str_replace('_', '', ucwords($key, '_'));
-            $this->assertEquals($value, $job->$getter());
-        }
+        $this->assertEquals($mockData['name'], $job->getName());
+        $this->assertEquals($mockData['schedule'], $job->getSchedule());
     }
 
     public function testGetDataToSubmit()
@@ -111,5 +82,44 @@ class JobTest extends TestCase
         $this->assertInstanceOf(stdClass::class, $dataToSubmit['executor_config']);
         $this->assertInstanceOf(stdClass::class, $dataToSubmit['processors']);
         $this->assertInstanceOf(stdClass::class, $dataToSubmit['tags']);
+    }
+
+    /**
+     * @param string $value
+     * @param string $exception
+     *
+     * @dataProvider setConcurrencyDataProvider
+     */
+    public function testSetConcurrency($value, $exception = null)
+    {
+        $job = new Job('name', 'schedule');
+
+        if ($exception) {
+            $this->expectException($exception);
+        }
+        $job->setConcurrency($value);
+        $this->assertEquals($value, $job->getConcurrency());
+    }
+
+    public function setConcurrencyDataProvider()
+    {
+        return [
+            'success:allow' => [
+                'value' => Job::CONCURRENCY_ALLOW,
+                'exception' => null,
+            ],
+            'success:forbid' => [
+                'value' => Job::CONCURRENCY_FORBID,
+                'exception' => null,
+            ],
+            'error:empty' => [
+                'value' => '',
+                'exception' => \InvalidArgumentException::class,
+            ],
+            'error:invalid' => [
+                'value' => 'invalid',
+                'exception' => \InvalidArgumentException::class,
+            ],
+        ];
     }
 }

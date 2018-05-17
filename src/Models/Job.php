@@ -79,7 +79,6 @@ class Job implements \JsonSerializable
         string $lastSuccess = null,
         int $successCount = null
     ) {
-
         $this->name = $name;
         $this->setSchedule($schedule);
 
@@ -110,6 +109,7 @@ class Job implements \JsonSerializable
 
     /**
      * Get data to be serialized as json for API
+     *  All fields must be sent in order to overwrite values
      *
      * @return array[string]string
      */
@@ -315,6 +315,7 @@ class Job implements \JsonSerializable
                 . self::CONCURRENCY_ALLOW . ' or ' . self::CONCURRENCY_FORBID);
         }
         $this->concurrency = $concurrency;
+
         return $this;
     }
 
@@ -325,6 +326,7 @@ class Job implements \JsonSerializable
     public function setDependentJobs(array $dependentJobs): self
     {
         $this->dependentJobs = $dependentJobs;
+
         return $this;
     }
 
@@ -335,6 +337,7 @@ class Job implements \JsonSerializable
     public function setDisabled(bool $disabled): self
     {
         $this->disabled = (bool)$disabled;
+
         return $this;
     }
 
@@ -345,6 +348,7 @@ class Job implements \JsonSerializable
     public function setExecutor(string $executor)
     {
         $this->executor = $executor;
+
         return $this;
     }
 
@@ -355,6 +359,7 @@ class Job implements \JsonSerializable
     public function setExecutorConfig(array $executorConfig)
     {
         $this->executorConfig = $executorConfig;
+
         return $this;
     }
 
@@ -365,6 +370,7 @@ class Job implements \JsonSerializable
     public function setOwner(string $owner): self
     {
         $this->owner = $owner;
+
         return $this;
     }
 
@@ -375,6 +381,7 @@ class Job implements \JsonSerializable
     public function setOwnerEmail(string $ownerEmail): self
     {
         $this->ownerEmail = $ownerEmail;
+
         return $this;
     }
 
@@ -385,6 +392,7 @@ class Job implements \JsonSerializable
     public function setParentJob(string $parentJob): self
     {
         $this->parentJob = $parentJob;
+
         return $this;
     }
 
@@ -395,6 +403,7 @@ class Job implements \JsonSerializable
     public function setProcessors(array $processors): self
     {
         $this->processors = $processors;
+
         return $this;
     }
 
@@ -405,6 +414,7 @@ class Job implements \JsonSerializable
     public function setRetries(int $retries): self
     {
         $this->retries = $retries;
+
         return $this;
     }
 
@@ -415,6 +425,7 @@ class Job implements \JsonSerializable
     public function setSchedule($schedule): self
     {
         $this->schedule = $schedule;
+
         return $this;
     }
 
@@ -425,6 +436,7 @@ class Job implements \JsonSerializable
     public function setTags(array $tags): self
     {
         $this->tags = $tags;
+
         return $this;
     }
 
@@ -435,6 +447,7 @@ class Job implements \JsonSerializable
     public function setTimezone(string $timezone)
     {
         $this->timezone = $timezone;
+
         return $this;
     }
 
