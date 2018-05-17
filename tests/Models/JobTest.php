@@ -4,6 +4,7 @@ namespace Dkron\Tests\Models;
 
 use Dkron\Models\Job;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class JobTest extends TestCase
 {
@@ -106,9 +107,9 @@ class JobTest extends TestCase
             $this->assertEquals($value, $dataToSubmit[$key]);
         }
 
-        // check empty key-value arrays are converted to nulls
-        $this->assertNull($dataToSubmit['executor_config']);
-        $this->assertNull($dataToSubmit['processors']);
-        $this->assertNull($dataToSubmit['tags']);
+        // check key-value objects
+        $this->assertInstanceOf(stdClass::class, $dataToSubmit['executor_config']);
+        $this->assertInstanceOf(stdClass::class, $dataToSubmit['processors']);
+        $this->assertInstanceOf(stdClass::class, $dataToSubmit['tags']);
     }
 }

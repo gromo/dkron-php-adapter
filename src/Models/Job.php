@@ -101,6 +101,16 @@ class Job implements \JsonSerializable
     }
 
     /**
+     * @return string
+     */
+    public function getConcurrency(): string
+    {
+        return $this->concurrency;
+    }
+
+    /**
+     * Get data to be serialized as json for API
+     *
      * @return array[string]string
      */
     public function getDataToSubmit(): array
@@ -112,39 +122,15 @@ class Job implements \JsonSerializable
             'dependent_jobs' => $this->dependentJobs,
             'disabled' => $this->disabled,
             'executor' => $this->executor,
-            'executor_config' => empty($this->executorConfig) ? null : $this->executorConfig,
+            'executor_config' => (object)$this->executorConfig,
             'owner' => $this->owner,
             'owner_email' => $this->ownerEmail,
             'parent_job' => $this->parentJob,
-            'processors' => empty($this->processors) ? null : $this->processors,
+            'processors' => (object)$this->processors,
             'retries' => $this->retries,
-            'tags' => empty($this->tags) ? null : $this->tags,
+            'tags' => (object)$this->tags,
             'timezone' => $this->timezone,
         ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSchedule(): string
-    {
-        return $this->schedule;
-    }
-
-    /**
-     * @return string
-     */
-    public function getConcurrency(): string
-    {
-        return $this->concurrency;
     }
 
     /**
@@ -206,6 +192,14 @@ class Job implements \JsonSerializable
     /**
      * @return string
      */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * @return string
+     */
     public function getOwner(): string
     {
         return $this->owner;
@@ -241,6 +235,14 @@ class Job implements \JsonSerializable
     public function getRetries(): int
     {
         return $this->retries;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSchedule(): string
+    {
+        return $this->schedule;
     }
 
     /**
@@ -288,16 +290,16 @@ class Job implements \JsonSerializable
             'disabled' => $this->disabled,
             'error_count' => $this->errorCount,
             'executor' => $this->executor,
-            'executor_config' => $this->executorConfig,
+            'executor_config' => (object)$this->executorConfig,
             'last_error' => $this->lastError,
             'last_success' => $this->lastSuccess,
             'owner' => $this->owner,
             'owner_email' => $this->ownerEmail,
             'parent_job' => $this->parentJob,
-            'processors' => $this->processors,
+            'processors' => (object)$this->processors,
             'retries' => $this->retries,
             'success_count' => $this->successCount,
-            'tags' => $this->tags,
+            'tags' => (object)$this->tags,
             'timezone' => $this->timezone,
         ];
     }
