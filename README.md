@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/gromo/dkron-php-adapter.svg?branch=master)](https://travis-ci.com/gromo/dkron-php-adapter)
 [![PHP](https://img.shields.io/badge/PHP-%5E7.0-blue.svg)](https://packagist.org/packages/gromo/dkron-php-adapter)
-[![Version](https://img.shields.io/badge/version-0.10.0-green.svg)](https://packagist.org/packages/gromo/dkron-php-adapter)
+[![Dkron version](https://img.shields.io/badge/Dkron-v0.10.0-green.svg)](https://github.com/victorcoder/dkron/releases/tag/v0.10.0)
 
 
 
