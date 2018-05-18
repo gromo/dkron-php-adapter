@@ -8,13 +8,13 @@
 
 Adapter to communicate with [Dkron](https://dkron.io).
 
-Please read [API](https://dkron.io/usage/api/) for usage details
+Please read [Dkron API](https://dkron.io/usage/api/) for usage details
 
-### Install:
+## Install:
 - add `"gromo/dkron-php-adapter": "dev-master"` to your project `composer.json`
 - run `composer install`
 
-### Use:
+## Use:
 ```php
 $httpClient = new \GuzzleHttp\Client([
     'base_uri' => 'http://localhost:8080/',
@@ -71,7 +71,7 @@ $members = $api->getMembers();
 
 ```
 
-### API methods
+## API methods
 
 All URIs are relative to *http://localhost:8080/v1*
 
@@ -88,3 +88,7 @@ Method | Description | HTTP request
 *leave* | Force the node to leave the cluster | [**GET** /leave](https://dkron.io/usage/api/#get-leave)
 *getMembers* | Get members | [**GET** /members](https://dkron.io/usage/api/#get-members)
 
+
+## Contribute
+
+Please refer to [CONTRIBUTING.md](https://github.com/gromo/dkron-php-adapter/blob/master/.github/CONTRIBUTING.md) for information.
