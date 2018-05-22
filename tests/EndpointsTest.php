@@ -80,10 +80,10 @@ class EndpointsTest extends TestCase
         }
 
         // handle exception if no endpoints available
-        $this->expectException(DkronNoAvailableServersException::class);
         foreach ($endpoints as $endpoint) {
             $instance->setEndpointAsUnavailable($endpoint);
         }
+        $this->expectException(DkronNoAvailableServersException::class);
         $instance->getAvailableEndpoint();
     }
 

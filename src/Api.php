@@ -13,7 +13,6 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\{
     ConnectException, GuzzleException
 };
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 
@@ -23,7 +22,7 @@ class Api
     const METHOD_GET = 'GET';
     const METHOD_POST = 'POST';
     const METHOD_PUT = 'PUT';
-    const TIMEOUT = 5;
+    const TIMEOUT = 10;
     const URL_PREFIX = '/v1/';
 
     /** @var Endpoints */
