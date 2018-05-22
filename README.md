@@ -16,11 +16,8 @@ Please read [Dkron API](https://dkron.io/usage/api/) for usage details
 
 ## Use:
 ```php
-$httpClient = new \GuzzleHttp\Client([
-    'base_uri' => 'http://localhost:8080/',
-]);
-
-$api = new \Dkron\Api($httpClient);
+// connect to single ip
+$api = new \Dkron\Api('http://192.168.0.1:8080');
 
 // get status
 $status = $api->getStatus();
@@ -68,7 +65,15 @@ $leader = $api->getLeader();
 // get all nodes
 $members = $api->getMembers();
 
+// force current node to leave cluster
+$api->leave();
 
+
+// connect to multiple servers with round-robin requests
+$mApi = new \Dkron\Api(['http://192.168.0.1:8080', 'http://192.168.0.2:8080']);
+
+// force selected node to leave cluster
+$mApi->leave('http://192.168.0.1:8080');
 ```
 
 ## API methods
@@ -91,4 +96,4 @@ Method | Description | HTTP request
 
 ## Contribute
 
-Please refer to [CONTRIBUTING.md](https://github.com/gromo/dkron-php-adapter/blob/master/.github/CONTRIBUTING.md) for information.
+Please refer to [CONTRIBUTING.md](https://github.com/gromo/dkron-php-adapter/blob/master/CONTRIBUTING.md) for information.

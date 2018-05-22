@@ -2,13 +2,20 @@
 
 namespace Dkron;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Psr7\Response;
-
+use Dkron\Exception\{
+    DkronException, DkronResponseException, DkronNoAvailableServersException
+};
 use Dkron\Models\{
     Execution, Job, Member, Status
 };
+use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Exception\{
+    ConnectException, GuzzleException
+};
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 
 class Api
 {
@@ -16,23 +23,39 @@ class Api
     const METHOD_GET = 'GET';
     const METHOD_POST = 'POST';
     const METHOD_PUT = 'PUT';
+    const TIMEOUT = 5;
     const URL_PREFIX = '/v1/';
+
+    /** @var Endpoints */
+    private $endpoints;
 
     /** @var ClientInterface */
     private $httpClient;
 
     /**
      * Api constructor.
+     * @param string|array|Endpoints $endpoints
      * @param ClientInterface $httpClient
+     * @throws InvalidArgumentException
      */
-    public function __construct(ClientInterface $httpClient)
+    public function __construct($endpoints, ClientInterface $httpClient = null)
     {
+        if (!($endpoints instanceof Endpoints)) {
+            $endpoints = new Endpoints($endpoints);
+        }
+        $this->endpoints = $endpoints;
+
+        if (is_null($httpClient)) {
+            $httpClient = new Client([
+                'timeout' => self::TIMEOUT,
+            ]);
+        }
         $this->httpClient = $httpClient;
     }
 
     /**
      * @param string $name
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function deleteJob($name)
     {
@@ -42,7 +65,7 @@ class Api
     /**
      * @param string $name
      * @return Job
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function getJob(string $name): Job
     {
@@ -52,7 +75,7 @@ class Api
     /**
      * @param $name
      * @return Execution[]
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function getJobExecutions($name): array
     {
@@ -67,7 +90,7 @@ class Api
 
     /**
      * @return Job[]
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function getJobs(): array
     {
@@ -82,7 +105,7 @@ class Api
 
     /**
      * @return Member
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function getLeader(): Member
     {
@@ -91,7 +114,7 @@ class Api
 
     /**
      * @return Member[]
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function getMembers(): array
     {
@@ -106,7 +129,7 @@ class Api
 
     /**
      * @return Status
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function getStatus(): Status
     {
@@ -114,13 +137,21 @@ class Api
     }
 
     /**
+     * @param string $endpoint
      * @return Member[]
-     * @throws GuzzleException
+     * @throws DkronException
      */
-    public function leave(): array
+    public function leave(string $endpoint = null): array
     {
+        if (is_null($endpoint) && $this->endpoints->getSize() === 1) {
+            $endpoint = $this->endpoints->getAvailableEndpoint();
+        }
+        if (is_null($endpoint)) {
+            throw new InvalidArgumentException('Parameter endpoint has to be set');
+        }
+
         $members = [];
-        $responseData = $this->request('/leave');
+        $responseData = $this->request('/leave', self::METHOD_GET, null, $endpoint);
         foreach ($responseData as $memberData) {
             $members[] = Member::createFromArray($memberData);
         }
@@ -130,7 +161,7 @@ class Api
 
     /**
      * @param string $name
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function runJob($name)
     {
@@ -139,7 +170,7 @@ class Api
 
     /**
      * @param Job $job
-     * @throws GuzzleException
+     * @throws DkronException
      */
     public function saveJob(Job $job)
     {
@@ -150,20 +181,40 @@ class Api
      * @param string $url
      * @param string $method
      * @param mixed $data
+     * @param array|string|Endpoints $endpoints
      * @return array|null
-     * @throws GuzzleException
+     * @throws DkronException
      */
-    protected function request($url, $method = self::METHOD_GET, $data = null)
+    protected function request($url, $method = self::METHOD_GET, $data = null, $endpoints = null)
     {
-        /** @var Response $response */
-        $response = $this->httpClient->request(
-            $method,
-            self::URL_PREFIX . ltrim($url, '/'),
-            [
-                'json' => $data,
-            ]
-        );
+        if (is_null($endpoints)) {
+            $endpoints = $this->endpoints;
+        }
+        if (!($endpoints instanceof Endpoints)) {
+            $endpoints = new Endpoints($endpoints);
+        }
 
-        return json_decode($response->getBody(), true);
+        while ($endpoint = $endpoints->getAvailableEndpoint()) {
+            try {
+                /** @var Response $response */
+                $response = $this->httpClient->request($method, $endpoint . self::URL_PREFIX . ltrim($url, '/'), [
+                    'json' => $data,
+                ]);
+
+                $data = json_decode($response->getBody(), true);
+                if (JSON_ERROR_NONE !== json_last_error()) {
+                    throw new DkronResponseException('json_decode error: ' . json_last_error_msg());
+                }
+
+                return $data;
+            } catch (ConnectException $exception) {
+                $this->endpoints->setEndpointAsUnavailable($endpoint);
+            } catch (DkronException $exception) {
+                throw $exception;
+            } catch (\Throwable $exception) {
+                throw new DkronException($exception->getMessage());
+            }
+        }
     }
+
 }

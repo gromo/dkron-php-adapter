@@ -3,24 +3,110 @@
 namespace Dkron\Tests;
 
 use Dkron\Api;
+use Dkron\Exception\DkronNoAvailableServersException;
 use Dkron\Models\{
     Execution, Job, Member, Status
 };
+use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\{
+    ConnectException, RequestException
+};
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use stdClass;
 
 class ApiTest extends TestCase
 {
-    public function testDeleteJob()
+    public function constructorDataProvider()
     {
-        $http = $this->getHttpCient();
-        $api = new Api($http->client);
+        $defaults = $this->getHttpClient();
+        $defaults->client = null;
+
+        return [
+            'success:defaults' => [
+                'http' => $defaults,
+            ],
+            'success:endpointsAsString' => [
+                'http' => $this->getHttpClient(null, 'http://192.168.0.1:8080/')
+            ],
+            'success:endpointsAsArray' => [
+                'http' => $this->getHttpClient(null, [
+                    'http://192.168.0.1:8080/',
+                    'http://localhost/',
+                    'https://example.com/'
+                ]),
+            ],
+            'error:endpointsAsNumber' => [
+                'http' => $this->getHttpClient(null, 10),
+                'exception' => InvalidArgumentException::class,
+            ],
+            'error:endpointsAsInvalidUrl' => [
+                'http' => $this->getHttpClient(null, 'test.com'),
+                'exception' => InvalidArgumentException::class,
+            ],
+        ];
+    }
+
+    /**
+     * @param mixed $http
+     * @param string|null $exception
+     *
+     * @dataProvider constructorDataProvider
+     */
+    public function testConstructor($http, string $exception = null)
+    {
+        if ($exception) {
+            $this->expectException($exception);
+        }
+        $api = new Api($http->endpoints, $http->client);
+
+        // check api was created successfully
+        $this->assertInstanceOf(Api::class, $api);
+    }
+
+    /**
+     * Make sure all servers from the list were called
+     */
+    public function testAllEndpointsCalled()
+    {
+        $request = new Request('GET', '');
+        $http = $this->getHttpClient([
+            new ConnectException('Client Error', $request),
+            new ConnectException('Client Error', $request),
+            new ConnectException('Client Error', $request),
+        ], [
+            'http://192.168.0.1/',
+            'http://192.168.0.2/',
+            'http://192.168.0.3/'
+        ]);
+
+        $api = new Api($http->endpoints, $http->client);
+        $exceptionHandled = false;
+
+        try {
+            $api->getStatus();
+        } catch (Exception $exception) {
+            $this->assertInstanceOf(DkronNoAvailableServersException::class, $exception);
+            $exceptionHandled = true;
+        }
+
+        $this->assertTrue($exceptionHandled);
+        $this->assertCount(3, $http->transactions);
+
+    }
+
+    public function testMethodDeleteJob()
+    {
+        $http = $this->getHttpClient();
+        $api = new Api($http->endpoints, $http->client);
         $jobName = 'job001';
 
         $api->deleteJob($jobName);
@@ -30,14 +116,14 @@ class ApiTest extends TestCase
         $this->assertEquals('DELETE', mb_strtoupper($request->getMethod()));
     }
 
-    public function testGetJob()
+    public function testMethodGetJob()
     {
         $mockData = [
             'name' => 'test:name',
             'schedule' => 'test:schedule',
         ];
-        $http = $this->getHttpCient($mockData);
-        $api = new Api($http->client);
+        $http = $this->getHttpClient([$mockData]);
+        $api = new Api($http->endpoints, $http->client);
 
         $job = $api->getJob($mockData['name']);
 
@@ -52,20 +138,14 @@ class ApiTest extends TestCase
         $this->assertEquals($mockData['schedule'], $job->getSchedule());
     }
 
-    public function testGetJobExecutions()
+    public function testMethodGetJobExecutions()
     {
         $mockData = [
-            [
-                'job_name' => 'nameA',
-                'success' => true,
-            ],
-            [
-                'job_name' => 'nameB',
-                'success' => false,
-            ],
+            ['job_name' => 'nameA', 'success' => true],
+            ['job_name' => 'nameB', 'success' => false],
         ];
-        $http = $this->getHttpCient($mockData);
-        $api = new Api($http->client);
+        $http = $this->getHttpClient([$mockData]);
+        $api = new Api($http->endpoints, $http->client);
         $jobName = 'job001';
 
         $executions = $api->getJobExecutions($jobName);
@@ -86,20 +166,14 @@ class ApiTest extends TestCase
         }
     }
 
-    public function testGetJobs()
+    public function testMethodGetJobs()
     {
         $mockData = [
-            [
-                'name' => 'nameA',
-                'schedule' => 'scheduleA',
-            ],
-            [
-                'name' => 'nameB',
-                'schedule' => 'scheduleB',
-            ],
+            ['name' => 'nameA', 'schedule' => 'scheduleA'],
+            ['name' => 'nameB', 'schedule' => 'scheduleB'],
         ];
-        $http = $this->getHttpCient($mockData);
-        $api = new Api($http->client);
+        $http = $this->getHttpClient([$mockData]);
+        $api = new Api($http->endpoints, $http->client);
 
         $jobs = $api->getJobs();
 
@@ -118,14 +192,14 @@ class ApiTest extends TestCase
         }
     }
 
-    public function testGetLeader()
+    public function testMethodGetLeader()
     {
         $mockData = [
             'Name' => 'leader:name',
             'Addr' => 'leader:addr',
         ];
-        $http = $this->getHttpCient($mockData);
-        $api = new Api($http->client);
+        $http = $this->getHttpClient([$mockData]);
+        $api = new Api($http->endpoints, $http->client);
 
         $leader = $api->getLeader();
 
@@ -140,20 +214,14 @@ class ApiTest extends TestCase
         $this->assertEquals($mockData['Addr'], $leader->getAddr());
     }
 
-    public function testGetMembers()
+    public function testMethodGetMembers()
     {
         $mockData = [
-            [
-                'Name' => 'nameA',
-                'Addr' => 'addrA',
-            ],
-            [
-                'Name' => 'nameB',
-                'Addr' => 'addrB',
-            ],
+            ['Name' => 'nameA', 'Addr' => 'addrA'],
+            ['Name' => 'nameB', 'Addr' => 'addrB'],
         ];
-        $http = $this->getHttpCient($mockData);
-        $api = new Api($http->client);
+        $http = $this->getHttpClient([$mockData]);
+        $api = new Api($http->endpoints, $http->client);
 
         $members = $api->getMembers();
 
@@ -173,7 +241,7 @@ class ApiTest extends TestCase
         }
     }
 
-    public function testGetStatus()
+    public function testMethodGetStatus()
     {
         $mockData = [
             'agent' => [
@@ -193,8 +261,8 @@ class ApiTest extends TestCase
                 'dkron_version' => '0.10.0',
             ]
         ];
-        $http = $this->getHttpCient($mockData);
-        $api = new Api($http->client);
+        $http = $this->getHttpClient([$mockData]);
+        $api = new Api($http->endpoints, $http->client);
 
         $status = $api->getStatus();
 
@@ -210,20 +278,14 @@ class ApiTest extends TestCase
         $this->assertEquals($mockData['tags'], $status->getTags());
     }
 
-    public function testLeave()
+    public function testMethodLeaveWithOneEndpoint()
     {
         $mockData = [
-            [
-                'Name' => 'nameA',
-                'Addr' => 'addrA',
-            ],
-            [
-                'Name' => 'nameB',
-                'Addr' => 'addrB',
-            ],
+            ['Name' => 'nameA', 'Addr' => 'addrA'],
+            ['Name' => 'nameB', 'Addr' => 'addrB'],
         ];
-        $http = $this->getHttpCient($mockData);
-        $api = new Api($http->client);
+        $http = $this->getHttpClient([$mockData]);
+        $api = new Api($http->endpoints, $http->client);
 
         $members = $api->leave();
 
@@ -243,10 +305,46 @@ class ApiTest extends TestCase
         }
     }
 
-    public function testRunJob()
+    public function testMethodLeaveWithEmptyEndpoint()
     {
-        $http = $this->getHttpCient();
-        $api = new Api($http->client);
+        $mockData = [
+            ['Name' => 'nameA', 'Addr' => 'addrA'],
+            ['Name' => 'nameB', 'Addr' => 'addrB'],
+        ];
+        $mockEndpoints = [
+            'http://192.168.0.1',
+            'http://192.168.0.2',
+            'http://192.168.0.3',
+        ];
+        $http = $this->getHttpClient([$mockData], $mockEndpoints);
+        $api = new Api($http->endpoints, $http->client);
+
+        $this->expectException(InvalidArgumentException::class);
+        $api->leave();
+    }
+
+    public function testMethodLeaveWithSpecificEndpoint()
+    {
+        $mockData = [
+            ['Name' => 'nameA', 'Addr' => 'addrA'],
+            ['Name' => 'nameB', 'Addr' => 'addrB'],
+        ];
+        $mockEndpoints = [
+            'http://192.168.0.1',
+            'http://192.168.0.2',
+            'http://192.168.0.3',
+        ];
+        $http = $this->getHttpClient([$mockData], $mockEndpoints);
+        $api = new Api($http->endpoints, $http->client);
+
+        $members = $api->leave($mockEndpoints[0]);
+        $this->assertCount(2, $members);
+    }
+
+    public function testMethodRunJob()
+    {
+        $http = $this->getHttpClient();
+        $api = new Api($http->endpoints, $http->client);
         $jobName = 'job001';
 
         $api->runJob($jobName);
@@ -257,7 +355,7 @@ class ApiTest extends TestCase
         $this->assertEquals('POST', mb_strtoupper($request->getMethod()));
     }
 
-    public function testSaveJob()
+    public function testMethodSaveJob()
     {
         $mockData = [
             'name' => 'test:name',
@@ -273,8 +371,8 @@ class ApiTest extends TestCase
                 ],
             ],
         ];
-        $http = $this->getHttpCient($mockData);
-        $api = new Api($http->client);
+        $http = $this->getHttpClient([$mockData]);
+        $api = new Api($http->endpoints, $http->client);
         $job = Job::createFromArray($mockData);
 
         $api->saveJob($job);
@@ -289,17 +387,26 @@ class ApiTest extends TestCase
 
 
     /**
-     * @param array $data
+     * @param array $responses
+     * @param mixed $endpoints
      * @return stdClass
      */
-    protected function getHttpCient(array $data = null): stdClass
+    protected function getHttpClient(array $responses = null, $endpoints = 'http://127.0.0.1/'): stdClass
     {
         $output = new stdClass();
+        $output->endpoints = $endpoints;
         $output->transactions = [];
 
-        $handler = HandlerStack::create(new MockHandler([
-            new Response(200, ['Content-Type: application/json'], json_encode($data)),
-        ]));
+        if (is_null($responses)) {
+            $responses = [null];
+        }
+        $responses = array_map(function ($response) {
+            return ($response instanceof ResponseInterface) || ($response instanceof RequestException)
+                ? $response
+                : new Response(200, ['Content-Type: application/json'], json_encode($response));
+        }, $responses);
+
+        $handler = HandlerStack::create(new MockHandler($responses));
         $handler->push(Middleware::history($output->transactions));
 
         $output->client = new Client([
